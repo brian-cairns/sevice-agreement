@@ -34,6 +34,12 @@ date.addEventListener('change', (e) => {
 	newForm.date = e.target.value;
   console.log(newForm.date);
 })
+
+let providerDate = document.querySelector('input#providerDate')
+providerDate.addEventListener('change', (e) => {
+	newForm.providerDate = e.target.value;
+  console.log(newForm.providerDate);
+})
   
 document.getElementById('submit').addEventListener("click", async (event) => {
     submitForm(newForm, formName)
