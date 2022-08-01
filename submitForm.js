@@ -107,5 +107,5 @@ async function removeNotice(name, message) {
 const printToPdf = document.getElementById('printToPDF');
 printToPdf.addEventListener('click', (e) => {
   sessionStorage.setItem('signer', newForm.caregiverName);
-  location.href = 'https://phoenix-freedom-foundation-backend.webflow.io/complete-forms/autism-support-services-service-agreement-form'
+  location.href = 'https://phoenix-freedom-foundation-backend.webflow.io/completed-forms/autism-support-services-service-agreement-form'
 })
