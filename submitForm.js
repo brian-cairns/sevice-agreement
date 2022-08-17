@@ -4,48 +4,21 @@ const formName = 'autismSupportServices'
 console.log('form: ' + formName)
 let newForm = {}
 
-let caregiverName = document.querySelector('input#caregiverName')
+let caregiverName = document.querySelector('input#name')
 caregiverName.addEventListener('change', (e) => {
 	console.log('changed')
 	newForm.caregiverName = e.target.value;
   console.log(newForm.caregiverName);
   })
-  
-let providerName = document.querySelector('input#providerName')
-providerName.addEventListener('change', (e) => {
-	newForm.providerName = e.target.value;
-  console.log(newForm.providerName);
-})
-
-let caregiverSignature = document.querySelector('input#caregiverSignature')
-caregiverSignature.addEventListener('change', (e) => {
-	newForm.caregiverSignature = e.target.value;
-  console.log(newForm.caregiverSignature);
-})
-
-let providerSignature = document.querySelector('input#providerSignature')
-providerSignature.addEventListener('change', (e) => {
-	newForm.providerSignature = e.target.value;
-  console.log(newForm.providerSignature);
-})
-
-let date = document.querySelector('input#date')
-date.addEventListener('change', (e) => {
-	newForm.date = e.target.value;
-  console.log(newForm.date);
-})
-
-let providerDate = document.querySelector('input#providerDate')
-providerDate.addEventListener('change', (e) => {
-	newForm.providerDate = e.target.value;
-  console.log(newForm.providerDate);
-})
-  
+ 
 document.getElementById('submit').addEventListener("click", async (event) => {
   submitForm(newForm, formName)
  // message =
  // removeNotice(newForm.clientName, )
 })
+
+const printToPdf = document.getElementById('printToPDF');
+printToPDF.style.display= 'none'
 
 async function submitForm(data, form) {
   const document = {
@@ -61,24 +34,29 @@ async function submitForm(data, form) {
     },
     body: JSON.stringify(document)
   })
-    .then((response) => {
-      if (response.status == 200) {
-      showSuccess()
-      } else {
-        showError(response.body)
-      }
-    })
+    .then(response => response.json())
+    .then(data => respond(data)) 
     .catch((err) => showError(err))
 }
 
-
-function showSuccess() {
-    document.getElementById('returnMessage').innerHTML = 'Form has been successfully submitted'
+function respond(data) {
+  let id = data.key
+  if (id) {
+    showSuccess(id) 
+  } else {
+    showError(data.error)
+  }
 }
 
-function showError(err) {
-    console.error
-    document.getElementById('returnMessage').innerHTML = `An error occurred when submitting this form, which was ${err}. Please contact the administrator for help.`
+function showSuccess(id) {
+  document.getElementById('returnMessage').innerHTML = 'Form has been successfully submitted'
+  
+  sendNotification(id, 'admin',  'individual', 'not urgent')
+  printForm.style.display = 'inline';
+  printForm.addEventListener('click', (e) => {
+  console.log(id)
+  location.href = `https://phoenix-freedom-foundation-backend.webflow.io/completed-forms/service-agreement?key=${id}`
+  })
 }
 
 async function removeNotice(name, message) {
@@ -109,3 +87,28 @@ printToPdf.addEventListener('click', (e) => {
   sessionStorage.setItem('signer', newForm.caregiverName);
   location.href = 'https://phoenix-freedom-foundation-backend.webflow.io/completed-forms/autism-support-services-service-agreement-form'
 })
+
+async function sendNotification(id, recipient, type, priority) {
+  let message = `You have a new <br/><a href=phoenix-freedom-foundation-backend.webflow.io/completed-forms/release-of-liability-form?id=${id}>Release of Liability</a> was submitted`
+  console.log(message)
+  const url = 'https://pffm.azurewebsites.net/notices'
+  let notification = {
+    'name': recipient,
+    'notice': message,
+    'type': type,
+    'priority': priority
+  }
+  const header = {
+      'Content-Type': 'application/json',
+      "Access-Control-Allow-Origin" : "*"
+  }
+  
+  fetch(url, {
+    method: "POST",
+    headers: header,
+    body: JSON.stringify(notification)
+  })
+    .then(() => console.log('notice sent'))
+    .catch(console.error)
+}
+
